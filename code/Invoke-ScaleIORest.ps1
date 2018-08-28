@@ -39,23 +39,22 @@ Try {
     $spmetrics = $Config.poolmetrics
     $_smtp = $config.alerts
     $smtp = @{}
-    $_smtp.PSObject.Properties | Where {$_.Name -notmatch "_"} | ForEach {$smtp[$_.name] = $_.value}
-    $MaxFrequencyMinutes = $_smtp._MaxFrequencyMinutes
+    $_smtp.PSObject.Properties | ForEach {$smtp[$_.name] = $_.value}
     $_smtp = $null
+    $EmailInterval = $Config.Globals.EmailInterval
+    $PollingIntervalSec = $Config.Globals.PollingIntervalSec
     $LastSMTP = (Get-Date)
 } catch {
     Write-Warning "Error reading config - abort!"
     exit 1
 }
-
 function SendMail ($Message) {
-    if ($LastSMTP -lt (Get-Date).AddMinutes($MaxFrequencyMinutes * -1)) {
+    if ($LastSMTP -lt (Get-Date).AddMinutes($EmailInterval * -1)) {
         $smtp.body = "Unhandled exception at $(Get-Date)\r\n$_"
         Send-MailMessage @smtp
     }
     $LastSMTP= (Get-Date)
 }
-
 function Login-ScaleIO($Gateway) {
  
     $credPair = "$($Gateway.username):$($Gateway.password)"
@@ -87,7 +86,6 @@ Function Perform-Login() {
         $Gateway.Token = $Token
     }
 }
-
 Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
     $Headers = @{Authorization = "Basic $($Gateway.Token)"}
     try {
@@ -154,6 +152,6 @@ While ($true) {
             }
         }
     }
-    # Write-Host "Wrote data at $(Get-Date)"
-    Start-Sleep -Seconds 60
+    #Write-Host "Wrote data at $(Get-Date)"
+    Start-Sleep -Seconds $PollingIntervalSec
 }
