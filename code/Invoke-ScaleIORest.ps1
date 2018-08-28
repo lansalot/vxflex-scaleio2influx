@@ -143,8 +143,10 @@ While ($true) {
                     } else {
                         $value = $Stats.$metric
                     }
-                    $influxEntry += "$($metric.replace('.numOccured',''))=$($value)i,"
+                    $influxEntry += "$($metric)=$($value)i,"
                 }
+                $influxentry = $influxEntry.Replace(".numOccured","_IOPS")
+                $influxentry = $influxEntry.Replace(".totalWeightInKb","_thruKB")
                 $influxentry = $influxentry -replace ".$"
                 $influxentry += " $($timestamp)"
                 Write-Debug "$influxentry"
@@ -152,6 +154,6 @@ While ($true) {
             }
         }
     }
-    #Write-Host "Wrote data at $(Get-Date)"
+    Write-Host "." -NoNewline
     Start-Sleep -Seconds $PollingIntervalSec
 }

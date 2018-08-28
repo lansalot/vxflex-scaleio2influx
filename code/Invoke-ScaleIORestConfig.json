@@ -5,24 +5,24 @@
     },
     "Gateways": [
         {
-            "ip" : "10.121.2.36",
+            "ip" : "10.10.1.1",
             "FriendlyName" : "production",
-            "username" : "monitorsio",
-            "password" : "CheckMe00t!",
+            "username" : "readonly",
+            "password" : "lowprivs!",
             "enabled": true
         },
         {
-            "ip" : "10.121.2.200",
+            "ip" : "10.10.1.2",
             "FriendlyName" : "backup",
-            "username" : "monitorsio",
-            "password" : "CheckMe00t!",
+            "username" : "readonly",
+            "password" : "lowprivs!",
             "enabled" : true
         }
     ],
     "Influx": {
-        "ip" : "http://10.40.4.200:8086",
+        "ip" : "http://10.10.10.3:8086",
         "username" : "grafana",
-        "password" : "Wasspord1",
+        "password" : "Str00ngpw!",
         "database" : "GRAFANA"
     },
     "poolmetrics" : [
@@ -51,6 +51,7 @@
         "normRebuildWriteBwc.totalWeightInKb",
         "capacityInUseInKb",
         "rebalanceReadBwc.numOccured",
+        "rebalanceReadBwc.totalWeightInKb",
         "thinCapacityInUseInKb",
         "SecondaryReadFromDevBwc.numOccured",
         "SecondaryReadFromDevBwc.totalWeightInKb",
@@ -74,9 +75,9 @@
         "failedCapacityInKb"
     ],
     "alerts": {
-        "smtpserver": "smtprelay.highlandcouncil.gov.uk",
-        "from": "grafana@highland.gov.uk",
-        "to" : "andrew.williamson@wipro.com",
+        "smtpserver": "yourlocalsmtpserver.com",
+        "from": "grafana@yourorg.com",
+        "to" : "you@wherever.com",
         "subject" : "Issues with ScaleIO REST -> Influx system",
         "body" : "Set in code"
     }
