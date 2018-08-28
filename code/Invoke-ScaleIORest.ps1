@@ -154,6 +154,6 @@ While ($true) {
             }
         }
     }
-    Write-Host "Wrote data at $(Get-Date)"
+    # Write-Host "Wrote data at $(Get-Date)"
     Start-Sleep -Seconds 60
 }
