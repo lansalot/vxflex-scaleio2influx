@@ -27,3 +27,7 @@ Should be self-explanatory
 
 You may wish to put this as a computer startup script, and set it to run indefinitely
 
+## Import the Grafana dashboard
+
+- Create a datasource in Grafana called InfluxDB
+- Import the dashboard
