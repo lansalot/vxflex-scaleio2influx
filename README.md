@@ -21,7 +21,7 @@ If you're of a linux preference, just install the influxdb-server package with y
 
 ## Configure the script's supporting JSON file
 
-coming soon...
+Should be self-explanatory
 
 ## Run the script
 
