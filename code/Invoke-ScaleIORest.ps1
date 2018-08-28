@@ -43,17 +43,20 @@ Try {
     $_smtp = $null
     $EmailInterval = $Config.Globals.EmailInterval
     $PollingIntervalSec = $Config.Globals.PollingIntervalSec
-    $LastSMTP = (Get-Date)
+    $global:LastSMTP = (Get-Date)
 } catch {
     Write-Warning "Error reading config - abort!"
     exit 1
 }
 function SendMail ($Message) {
-    if ($LastSMTP -lt (Get-Date).AddMinutes($EmailInterval * -1)) {
-        $smtp.body = "Unhandled exception at $(Get-Date)\r\n$_"
+    if ($global:LastSMTP -lt (Get-Date).AddMinutes($EmailInterval * -1)) {
+        Write-Debug  "Sending email at $($global:LastSMTP)"
+        $smtp.body = "Unhandled exception at $(Get-Date)`r`n$_"
         Send-MailMessage @smtp
+    } else {
+        Write-Debug "Too soon for another email! $($global:LastSMTP)"
     }
-    $LastSMTP= (Get-Date)
+    $global:LastSMTP= (Get-Date)
 }
 function Login-ScaleIO($Gateway) {
  
