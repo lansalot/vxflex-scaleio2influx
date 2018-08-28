@@ -74,9 +74,9 @@ function Login-ScaleIO($Gateway) {
         }
     }
     catch {
-        "Unhandled exception"
+        Write-Debug "Unhandled exception"
         SendMail ($_)
-        $_
+        Write-Debug $_
     }
     return [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":" + $responsedata.content.replace('"','')))
 }
@@ -108,7 +108,7 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
     catch {
         Write-Debug "Unhandled exception"
         SendMail $_
-        $_
+        Write-Debug $_
         exit 1
     }
 }
@@ -118,8 +118,8 @@ Function Write-Influx ([String]$Messages) {
         Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 | Out-Null
     } catch {
         Write-Host "Error writing to influx"
-        $_
         SendMail "Error writing to influx`r`n$_"
+        Write-Debug $_
     }
 }
 # Initialise some globals
