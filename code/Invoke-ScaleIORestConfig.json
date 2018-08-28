@@ -1,66 +1,83 @@
 {
+    "Globals" : {
+        "PollingIntervalSec" : 60,
+        "EmailInterval": 60
+    },
     "Gateways": [
         {
-            "ip" : "10.10.1.1",
+            "ip" : "10.121.2.36",
             "FriendlyName" : "production",
-            "username" : "readonly",
-            "password" : "lowprivs!",
+            "username" : "monitorsio",
+            "password" : "CheckMe00t!",
             "enabled": true
         },
         {
-            "ip" : "10.10.1.2",
+            "ip" : "10.121.2.200",
             "FriendlyName" : "backup",
-            "username" : "readonly",
-            "password" : "lowprivs!",
+            "username" : "monitorsio",
+            "password" : "CheckMe00t!",
             "enabled" : true
         }
     ],
     "Influx": {
-        "ip" : "http://10.10.10.3:8086",
+        "ip" : "http://10.40.4.200:8086",
         "username" : "grafana",
-        "password" : "Str00ngpw!",
+        "password" : "Wasspord1",
         "database" : "GRAFANA"
     },
     "poolmetrics" : [
         "secondaryVacInKb",
         "bckRebuildWriteBwc.numOccured",
+        "bckRebuildWriteBwc.totalWeightInKb",
         "primaryReadFromDevBWC.numOccured",
+        "primaryReadFromDevBWC.totalWeightInKb",
         "primaryReadBWC.numOccured",
+        "primaryReadBWC.totalWeightInKb",
         "unusedCapacityInKb",
         "totalReadBwc.numOccured",
+        "totalReadBwc.totalWeightInKb",
         "fwdRebuildReadBwc.numOccured",
+        "fwdRebuildReadBwc.totalWeightInKb",
         "totalWriteBwc.numOccured",
+        "totalWriteBwc.totalWeightInKb",
         "protectedVacInKb",
         "capacityAvailableForVolumeAllocationInKb",
         "capacityLimitInKb",
         "atRestCapacityInKb",
         "bckRebuildReadBwc.numOccured",
+        "bckRebuildReadBwc.totalWeightInKb",
         "spareCapacityInKb",
         "normRebuildWriteBwc.numOccured",
+        "normRebuildWriteBwc.totalWeightInKb",
         "capacityInUseInKb",
         "rebalanceReadBwc.numOccured",
         "thinCapacityInUseInKb",
         "SecondaryReadFromDevBwc.numOccured",
+        "SecondaryReadFromDevBwc.totalWeightInKb",
         "SecondaryReadBwc.numOccured",
+        "SecondaryReadBwc.totalWeightInKb",
         "inUseVacInKb",
         "snapCapacityInUseInKb",
         "primaryWriteBwc.numOccured",
+        "primaryWriteBwc.totalWeightInKb",
         "fwdRebuildWriteBwc.numOccured",
+        "fwdRebuildWriteBwc.totalWeightInKb",
         "maxCapacityInKb",
         "protectedCapacityInKb",
         "secondaryWriteBwc.numOccured",
+        "secondaryWriteBwc.totalWeightInKb",
         "thinCapacityAllocatedInKm",
         "rebalanceWriteBwc.numOccured",
+        "rebalanceWriteBwc.totalWeightInKb",
         "primaryVacInKb",
         "degradedHealthyCapacityInKb",
         "failedCapacityInKb"
     ],
     "alerts": {
-        "smtpserver": "yourlocalsmtpserver.com",
-        "from": "grafana@yourorg.com",
-        "to" : "you@wherever.com",
+        "smtpserver": "smtprelay.highlandcouncil.gov.uk",
+        "from": "grafana@highland.gov.uk",
+        "to" : "andrew.williamson@wipro.com",
         "subject" : "Issues with ScaleIO REST -> Influx system",
-        "body" : "Set in code",
-        "_MaxFrequencyMinutes": "60"
+        "body" : "Set in code"
     }
 }
