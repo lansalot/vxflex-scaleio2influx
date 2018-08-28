@@ -118,8 +118,8 @@ Function Write-Influx ([String]$Messages) {
         Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 | Out-Null
     } catch {
         Write-Host "Error writing to influx"
-        SendMail "Error writing to influx\r\n$_"
         $_
+        SendMail "Error writing to influx`r`n$_"
     }
 }
 # Initialise some globals
