@@ -1,0 +1,66 @@
+{
+    "Gateways": [
+        {
+            "ip" : "10.10.1.1",
+            "FriendlyName" : "production",
+            "username" : "readonly",
+            "password" : "lowprivs!",
+            "enabled": true
+        },
+        {
+            "ip" : "10.10.1.2",
+            "FriendlyName" : "backup",
+            "username" : "readonly",
+            "password" : "lowprivs!",
+            "enabled" : true
+        }
+    ],
+    "Influx": {
+        "ip" : "http://10.10.10.3:8086",
+        "username" : "grafana",
+        "password" : "Str00ngpw!",
+        "database" : "GRAFANA"
+    },
+    "poolmetrics" : [
+        "secondaryVacInKb",
+        "bckRebuildWriteBwc.numOccured",
+        "primaryReadFromDevBWC.numOccured",
+        "primaryReadBWC.numOccured",
+        "unusedCapacityInKb",
+        "totalReadBwc.numOccured",
+        "fwdRebuildReadBwc.numOccured",
+        "totalWriteBwc.numOccured",
+        "protectedVacInKb",
+        "capacityAvailableForVolumeAllocationInKb",
+        "capacityLimitInKb",
+        "atRestCapacityInKb",
+        "bckRebuildReadBwc.numOccured",
+        "spareCapacityInKb",
+        "normRebuildWriteBwc.numOccured",
+        "capacityInUseInKb",
+        "rebalanceReadBwc.numOccured",
+        "thinCapacityInUseInKb",
+        "SecondaryReadFromDevBwc.numOccured",
+        "SecondaryReadBwc.numOccured",
+        "inUseVacInKb",
+        "snapCapacityInUseInKb",
+        "primaryWriteBwc.numOccured",
+        "fwdRebuildWriteBwc.numOccured",
+        "maxCapacityInKb",
+        "protectedCapacityInKb",
+        "secondaryWriteBwc.numOccured",
+        "thinCapacityAllocatedInKm",
+        "rebalanceWriteBwc.numOccured",
+        "primaryVacInKb",
+        "degradedHealthyCapacityInKb",
+        "failedCapacityInKb"
+    ],
+    "alerts": {
+        "smtpserver": "yourlocalsmtpserver.com",
+        "from": "grafana@yourorg.com",
+        "to" : "you@wherever.com",
+        "subject" : "Issues with ScaleIO REST -> Influx system",
+        "body" : "Set in code",
+        "_MaxFrequencyMinutes": "60"
+    }
+}
