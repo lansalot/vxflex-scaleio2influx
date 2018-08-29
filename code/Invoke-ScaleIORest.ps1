@@ -52,7 +52,7 @@ Try {
 function SendMail ($Message) {
     if ($global:LastSMTP -lt (Get-Date).AddMinutes($EmailInterval * -1)) {
         Write-Debug  "Sending email at $(Get-Date)  Last:$($global:LastSMTP)"
-        $smtp.body = "Unhandled exception at $(Get-Date)`r`n$_"
+        $smtp.body = "Unhandled exception at $(Get-Date)`r`n$Message`r`n$_"
         $global:LastSMTP = (Get-Date)
         Send-MailMessage @smtp
     } else {
