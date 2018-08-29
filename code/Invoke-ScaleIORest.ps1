@@ -46,6 +46,7 @@ Try {
     $global:LastSMTP = (Get-Date).AddMinutes($EmailInterval * -2)
 } catch {
     Write-Warning "Error reading config - abort!"
+    SendMail("Problem reading Config script. Please check once and do the needful.")
     exit 1
 }
 function SendMail ($Message) {
@@ -75,7 +76,7 @@ function Login-ScaleIO($Gateway) {
     }
     catch {
         Write-Debug "Unhandled exception"
-        SendMail ($_)
+        SendMail ("Unhandled exception in Login-ScaleIO`r`n$($_)")
         Write-Debug $_
     }
     return [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":" + $responsedata.content.replace('"','')))
@@ -106,8 +107,8 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
         }
     }
     catch {
-        Write-Debug "Unhandled exception"
-        SendMail $_
+        Write-Debug "Unhandled exception in Invoke-ScaleIORestMethod"
+        SendMail "Unhandled exception in Invoke-ScaleIORestMethod`r`n$($_)"
         Write-Debug $_
         exit 1
     }
@@ -117,7 +118,7 @@ Function Write-Influx ([String]$Messages) {
     try {
         Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 | Out-Null
     } catch {
-        Write-Host "Error writing to influx"
+        Write-Host "Error writing to influx`r`n$($_)"
         SendMail "Error writing to influx`r`n$_"
         Write-Debug $_
     }
