@@ -65,7 +65,7 @@ function Login-ScaleIO($Gateway) {
     $encodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($credPair))
     $headers = @{ Authorization = "Basic $encodedCredentials" }
     Try {
-        $responseData = Invoke-WebRequest -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers -UseBasicParsing
+        $responseData = Invoke-RESTMethod -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers -UseBasicParsing
     } 
     catch [System.Net.WebException] {
         if ($_.Exception.Response.StatusCode.Value__ -eq 401) {
@@ -79,7 +79,7 @@ function Login-ScaleIO($Gateway) {
         SendMail ("Unhandled exception in Login-ScaleIO`r`n$($_)")
         Write-Debug $_
     }
-    return [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":" + $responsedata.content.replace('"','')))
+    return [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":" + $responsedata.replace('"','')))
 }
 
 Function Perform-Login() {
@@ -93,8 +93,8 @@ Function Perform-Login() {
 Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
     $Headers = @{Authorization = "Basic $($Gateway.Token)"}
     try {
-        $responseData = Invoke-WebRequest -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers -UseBasicParsing
-        return ($responseData.Content | ConvertFrom-Json)
+        $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers -UseBasicParsing
+        return $responseData
     }
     catch [System.Net.WebException] {
         if ($_.Exception.Response.StatusCode.Value__ -eq 401) {
@@ -102,8 +102,8 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
             Write-Host "Looks like old logon token expired." -ForegroundColor Yellow
             Perform-Login
             # and try again...
-            $responseData = Invoke-WebRequest -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers -UseBasicParsing
-            return ($responseData.Content | ConvertFrom-Json)
+            $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers -UseBasicParsing
+            return $responseData
         }
     }
     catch {
@@ -116,6 +116,7 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
 
 Function Write-Influx ([String]$Messages) {
     try {
+        Write-Debug $InfluxURL
         Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 | Out-Null
     } catch {
         Write-Host "Error writing to influx`r`n$($_)"
