@@ -76,7 +76,7 @@ function Login-ScaleIO($Gateway) {
     }
     catch {
         Write-Debug "Unhandled exception"
-        SendMail ("Unhandled exception in Login-ScaleIO`r`n$($_)")
+        SendMail "Unhandled exception in Login-ScaleIO`r`n$($_)`r`n$($_.ScriptStackTrace)"
         Write-Debug $_
     }
     return [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":" + $responsedata.replace('"','')))
@@ -108,7 +108,7 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
     }
     catch {
         Write-Debug "Unhandled exception in Invoke-ScaleIORestMethod"
-        SendMail "Unhandled exception in Invoke-ScaleIORestMethod`r`n$($_)"
+        SendMail "Unhandled exception in Invoke-ScaleIORestMethod`r`n$($_)`r`n$($_.ScriptStackTrace)"
         Write-Debug $_
         exit 1
     }
@@ -117,10 +117,10 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
 Function Write-Influx ([String]$Messages) {
     try {
         Write-Debug $InfluxURL
-        Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 | Out-Null
+        Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 -DisableKeepAlive | Out-Null
     } catch {
         Write-Host "Error writing to influx`r`n$($_)"
-        SendMail "Error writing to influx`r`n$_"
+        SendMail "Error writing to influx`r`n$_`r`n$($_.ScriptStackTrace)"
         Write-Debug $_
     }
 }
@@ -133,6 +133,7 @@ Perform-Login
 
 While ($true) {
     $timestamp = [long]((New-TimeSpan -Start (Get-Date -Date '1970-01-01') -End ((Get-Date).ToUniversalTime())).TotalSeconds * 1E9)
+    $Error.Clear()
     ForEach ($GateWay in ($Gateways | Where {$_.enabled})) {
 
         $ProtectionDomains = Invoke-ScaleIORestMethod -Gateway $Gateway -URI "/api/types/ProtectionDomain/instances"
