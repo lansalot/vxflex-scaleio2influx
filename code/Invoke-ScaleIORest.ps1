@@ -1,6 +1,16 @@
-if (-not ([System.Management.Automation.PSTypeName]'ServerCertificateValidationCallback').Type)
-{
-$certCallback = @"
+<#
+.SYNOPSIS
+    Query ScaleIO/VxFlex arrays REST API, and push statistics to InfluxDB
+    All configuration is done in accompanying JSON file. Just run this, no parameters necessary
+.EXAMPLE
+    .\Invoke-ScaleIORest.ps1
+.LINK
+    https://github.com/lansalot/vxflex-scaleio2influx
+#>
+
+
+if (-not ([System.Management.Automation.PSTypeName]'ServerCertificateValidationCallback').Type) {
+    $certCallback = @"
     using System;
     using System.Net;
     using System.Net.Security;
@@ -65,7 +75,7 @@ function Login-ScaleIO($Gateway) {
     $encodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($credPair))
     $headers = @{ Authorization = "Basic $encodedCredentials" }
     Try {
-        $responseData = Invoke-RESTMethod -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers -UseBasicParsing
+        $responseData = Invoke-RESTMethod -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers
     } 
     catch [System.Net.WebException] {
         if ($_.Exception.Response.StatusCode.Value__ -eq 401) {
@@ -93,7 +103,7 @@ Function Perform-Login() {
 Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
     $Headers = @{Authorization = "Basic $($Gateway.Token)"}
     try {
-        $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers -UseBasicParsing
+        $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers
         return $responseData
     }
     catch [System.Net.WebException] {
@@ -102,7 +112,7 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
             Write-Host "Looks like old logon token expired." -ForegroundColor Yellow
             Perform-Login
             # and try again...
-            $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers -UseBasicParsing
+            $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers
             return $responseData
         }
     }
