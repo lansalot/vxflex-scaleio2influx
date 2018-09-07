@@ -154,15 +154,22 @@ While ($true) {
                 $influxentry = "scaleio,Cluster=$($Gateway.Friendlyname),Pool=$($StoragePool.Name) "
                 
                 ForEach ($metric in $spmetrics) {
-                    if ($metric -match "\.") {
-                        $value = $Stats.$($metric.split(".")[0]).$($metric.split(".")[1])
+                    if ($metric -match "Bwc$") {
+                        if ($Stats.$($metric).numSeconds -ne 0) {
+                            $IOPS = [Math]::Round($Stats.$($metric).numOccured / $Stats.$($metric).numSeconds)
+                            $thruKB = [Math]::Round($Stats.$($metric).totalWeightInKb / $Stats.$($metric).numSeconds)
+                        } else {
+                            $IOPS = 0
+                            $thruKB = 0
+                        }
+                        $influxEntry += "$($metric)_IOPS=$($IOPS)i,$($metric)_thruKB=$($thruKB)i,"
                     } else {
                         $value = $Stats.$metric
+                        $influxEntry += "$($metric)=$($value)i,"
                     }
-                    $influxEntry += "$($metric)=$($value)i,"
                 }
-                $influxentry = $influxEntry.Replace(".numOccured","_IOPS")
-                $influxentry = $influxEntry.Replace(".totalWeightInKb","_thruKB")
+                # $influxentry = $influxEntry.Replace(".numOccured","_IOPS")
+                # $influxentry = $influxEntry.Replace(".totalWeightInKb","_thruKB")
                 $influxentry = $influxentry -replace ".$"
                 $influxentry += " $($timestamp)"
                 Write-Debug "$influxentry"
