@@ -40,3 +40,4 @@ You may wish to put this as a computer startup script, and set it to run indefin
 
 - Create a datasource in Grafana called InfluxDB
 - Import the dashboard
+- adjust the datasource accordingly
