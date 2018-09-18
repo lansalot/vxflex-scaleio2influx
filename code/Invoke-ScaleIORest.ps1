@@ -7,38 +7,38 @@
 .LINK
     https://github.com/lansalot/vxflex-scaleio2influx
 #>
-
-
-if (-not ([System.Management.Automation.PSTypeName]'ServerCertificateValidationCallback').Type) {
-    $certCallback = @"
-    using System;
-    using System.Net;
-    using System.Net.Security;
-    using System.Security.Cryptography.X509Certificates;
-    public class ServerCertificateValidationCallback
-    {
-        public static void Ignore()
+if (-not  ($PSVersionTable.PSedition -eq 'Core') ) {
+    if (-not ([System.Management.Automation.PSTypeName]'ServerCertificateValidationCallback').Type) {
+        $certCallback = @"
+        using System;
+        using System.Net;
+        using System.Net.Security;
+        using System.Security.Cryptography.X509Certificates;
+        public class ServerCertificateValidationCallback
         {
-            if(ServicePointManager.ServerCertificateValidationCallback ==null)
+            public static void Ignore()
             {
-                ServicePointManager.ServerCertificateValidationCallback += 
-                    delegate
-                    (
-                        Object obj, 
-                        X509Certificate certificate, 
-                        X509Chain chain, 
-                        SslPolicyErrors errors
-                    )
-                    {
-                        return true;
-                    };
+                if(ServicePointManager.ServerCertificateValidationCallback ==null)
+                {
+                    ServicePointManager.ServerCertificateValidationCallback += 
+                        delegate
+                        (
+                            Object obj, 
+                            X509Certificate certificate, 
+                            X509Chain chain, 
+                            SslPolicyErrors errors
+                        )
+                        {
+                            return true;
+                        };
+                }
             }
         }
-    }
 "@
-    Add-Type $certCallback
+        Add-Type $certCallback
+    }
+    [ServerCertificateValidationCallback]::Ignore()
 }
-[ServerCertificateValidationCallback]::Ignore()
 
 Try {
     $Config = (Get-Content "$($PSScriptRoot)\Invoke-ScaleIORestConfig.json" -Raw | ConvertFrom-Json)
@@ -75,7 +75,11 @@ function Login-ScaleIO($Gateway) {
     $encodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($credPair))
     $headers = @{ Authorization = "Basic $encodedCredentials" }
     Try {
-        $responseData = Invoke-RESTMethod -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers
+        if ($PSVersionTable.PSEdition -eq 'Core') {
+            $responseData = Invoke-RESTMethod -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers -SkipCertificateCheck
+        } else {
+            $responseData = Invoke-RESTMethod -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers
+        }
     } 
     catch [System.Net.WebException] {
         if ($_.Exception.Response.StatusCode.Value__ -eq 401) {
@@ -103,7 +107,11 @@ Function Perform-Login() {
 Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
     $Headers = @{Authorization = "Basic $($Gateway.Token)"}
     try {
-        $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers
+        if ($PSVersionTable.PSEdition -eq 'Core') {
+            $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers -SkipCertificateCheck
+        } else {
+            $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers
+        }
         return $responseData
     }
     catch [System.Net.WebException] {
@@ -112,8 +120,7 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
             Write-Host "Looks like old logon token expired." -ForegroundColor Yellow
             Perform-Login
             # and try again...
-            $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers
-            return $responseData
+            Invoke-ScaleIORestMethod -URI $Gateway -uri $URI
         }
     }
     catch {
@@ -127,7 +134,11 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
 Function Write-Influx ([String]$Messages) {
     try {
         Write-Debug $InfluxURL
-        Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 -DisableKeepAlive | Out-Null
+        if ($PSVersionTable.PSEdition -eq 'Core') {
+            Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 -DisableKeepAlive -SkipCertificateCheck | Out-Null
+        } else {
+            Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 -DisableKeepAlive | Out-Null
+        }
     } catch {
         Write-Host "Error writing to influx`r`n$($_)"
         SendMail "Error writing to influx`r`n$_`r`n$($_.ScriptStackTrace)"
