@@ -114,14 +114,12 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
         }
         return $responseData
     }
-    catch [System.Net.WebException] {
+    catch [System.Net.WebException],[Microsoft.Powershell.Commands.HttpResponseException] {
         if ($_.Exception.Response.StatusCode.Value__ -eq 401) {
             # Now, a login token is only valid for 8 hrs, even when in use, so let's get a new one
-            Write-Host "Looks like old logon token expired." -ForegroundColor Yellow
+            Write-Debug "Looks like old logon token expired."
             Perform-Login
-            # and try again...
-            Invoke-ScaleIORestMethod -URI $Gateway -uri $URI
-        }
+            Invoke-ScaleIORestMethod -Gateway $Gateway -URI $uri
     }
     catch {
         Write-Debug "Unhandled exception in Invoke-ScaleIORestMethod"
@@ -140,7 +138,7 @@ Function Write-Influx ([String]$Messages) {
             Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 -DisableKeepAlive | Out-Null
         }
     } catch {
-        Write-Host "Error writing to influx`r`n$($_)"
+        Write-Debug "Error writing to influx`r`n$($_)"
         SendMail "Error writing to influx`r`n$_`r`n$($_.ScriptStackTrace)"
         Write-Debug $_
     }
