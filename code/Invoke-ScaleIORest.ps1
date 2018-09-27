@@ -7,7 +7,7 @@
 .LINK
     https://github.com/lansalot/vxflex-scaleio2influx
 #>
-if (-not  ($PSVersionTable.PSedition -eq 'Core') ) {
+if (-not $IsCoreCLR ) {
     if (-not ([System.Management.Automation.PSTypeName]'ServerCertificateValidationCallback').Type) {
         $certCallback = @"
         using System;
@@ -75,7 +75,7 @@ function Login-ScaleIO($Gateway) {
     $encodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($credPair))
     $headers = @{ Authorization = "Basic $encodedCredentials" }
     Try {
-        if ($PSVersionTable.PSEdition -eq 'Core') {
+        if ($IsCoreCLR) {
             $responseData = Invoke-RESTMethod -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers -SkipCertificateCheck
         } else {
             $responseData = Invoke-RESTMethod -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers
@@ -107,7 +107,7 @@ Function Perform-Login() {
 Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
     $Headers = @{Authorization = "Basic $($Gateway.Token)"}
     try {
-        if ($PSVersionTable.PSEdition -eq 'Core') {
+        if ($IsCoreCLR) {
             $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers -SkipCertificateCheck
         } else {
             $responseData = Invoke-RESTMethod -uri "https://$($Gateway.ip)$($uri)" -Method Get -Headers $headers
@@ -120,9 +120,14 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
             Write-Debug "Looks like old logon token expired."
             Perform-Login
             Invoke-ScaleIORestMethod -Gateway $Gateway -URI $uri
+        } else {
+            Write-Debug "Unhandled exception in InvokeScaleIORestMethod1"
+            SendMail "Unhandled exception in Invoke-ScaleIORestMethod`r`n$($_)`r`n$($_.ScriptStackTrace)"
+            Write-Debug $_
+        }
     }
     catch {
-        Write-Debug "Unhandled exception in Invoke-ScaleIORestMethod"
+        Write-Debug "Unhandled exception in Invoke-ScaleIORestMethod2"
         SendMail "Unhandled exception in Invoke-ScaleIORestMethod`r`n$($_)`r`n$($_.ScriptStackTrace)"
         Write-Debug $_
         exit 1
@@ -132,7 +137,7 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
 Function Write-Influx ([String]$Messages) {
     try {
         Write-Debug $InfluxURL
-        if ($PSVersionTable.PSEdition -eq 'Core') {
+        if ($IsCoreCLR) {
             Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 -DisableKeepAlive -SkipCertificateCheck | Out-Null
         } else {
             Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 -DisableKeepAlive | Out-Null
