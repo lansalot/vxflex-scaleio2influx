@@ -2,7 +2,7 @@
 A powershell script to query the ScaleIO/VxFlex REST API, and send to InfluxDB for use with Grafana etc
 
 Requirements
-- Powershell (wintel or *nix)
+- Powershell wintel (core or standard) or *nix (core)
 - ScaleIO or VxFlex, with the EMC Gateway service configured and available
 - An [InfluxDB](https://www.influxdata.com/) instance
 - (optional) [Grafana](https://grafana.com/)
