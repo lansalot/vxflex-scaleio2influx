@@ -53,7 +53,7 @@ Try {
     $_smtp = $null
     $EmailInterval = $Config.Globals.EmailInterval
     $PollingIntervalSec = $Config.Globals.PollingIntervalSec
-    $global:LastSMTP = (Get-Date).AddMinutes($EmailInterval * -2)
+    $global:LastSMTP = (Get-Date).AddMinutes($EmailInterval * -1)
 } catch {
     Write-Warning "Error reading config - abort!"
     SendMail("Problem reading Config script. Please check once and do the needful.")
@@ -70,7 +70,6 @@ function SendMail ($Message) {
     }
 }
 function Login-ScaleIO($Gateway) {
- 
     $credPair = "$($Gateway.username):$($Gateway.password)"
     $encodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($credPair))
     $headers = @{ Authorization = "Basic $encodedCredentials" }
@@ -182,8 +181,6 @@ While ($true) {
                         $influxEntry += "$($metric)=$($value)i,"
                     }
                 }
-                # $influxentry = $influxEntry.Replace(".numOccured","_IOPS")
-                # $influxentry = $influxEntry.Replace(".totalWeightInKb","_thruKB")
                 $influxentry = $influxentry -replace ".$"
                 $influxentry += " $($timestamp)"
                 Write-Debug "$influxentry"
