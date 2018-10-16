@@ -56,7 +56,7 @@ Try {
     $global:LastSMTP = (Get-Date).AddMinutes($EmailInterval * -1)
 } catch {
     Write-Warning "Error reading config - abort!"
-    SendMail("Problem reading Config script. Please check once and do the needful.")
+    SendMail("Problem reading Config script. Please check and resolve")
     exit 1
 }
 function SendMail ($Message) {
