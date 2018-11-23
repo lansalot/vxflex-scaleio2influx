@@ -154,11 +154,18 @@ $StoragePools = @()
 
 Perform-Login
 
+# while the sampling period is defined in the JSON, we'll only write a zero-errors entry to influx every 1 hour if applicable
+$LastDiskErrors = @{}
 While ($true) {
     $timestamp = [long]((New-TimeSpan -Start (Get-Date -Date '1970-01-01') -End ((Get-Date).ToUniversalTime())).TotalSeconds * 1E9)
     $Error.Clear()
     ForEach ($GateWay in ($Gateways | Where {$_.enabled})) {
 
+        # Make a dictionary of gateways, to store the last time a zero-disk-error counter was updated
+        if (-not $LastDiskErrors.ContainsKey($Gateway.FriendlyName)) {
+            Write-Debug "Setting an initial LastDiskError for $($Gateway.FriendlyName)"
+            $LastDiskErrors[$Gateway.FriendlyName] = (Get-Date).AddMinutes(-61)
+        }
         # First, let's look for any disk errors or dodgy cluster state
         $failedDisks = 0
         $ErrorState = ""
@@ -177,6 +184,12 @@ While ($true) {
             $smtp.subject = $pre
             Write-Influx "ScaleioErrors,Cluster=$($Gateway.FriendlyName) failedDisks=$($failedDisks)i $($timestamp)"
             SendMail $ErrorState
+        } else {
+            if ($LastDiskErrors[$Gateway.FriendlyName] -lt (Get-Date).AddHours(-1)) {
+                Write-Debug "Time for a new zero-count for disk errors for $($Gateway.FriendlyName)"
+                Write-Influx "ScaleioErrors,Cluster=$($Gateway.FriendlyName) failedDisks=0i $($timestamp)"
+                $LastDiskErrors[$Gateway.FriendlyName] = (Get-Date)
+            }
         }
 
         $ProtectionDomains = Invoke-ScaleIORestMethod -Gateway $Gateway -URI "/api/types/ProtectionDomain/instances"
