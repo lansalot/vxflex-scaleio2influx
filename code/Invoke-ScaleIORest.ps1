@@ -20,12 +20,12 @@ if (-not $IsCoreCLR ) {
             {
                 if(ServicePointManager.ServerCertificateValidationCallback ==null)
                 {
-                    ServicePointManager.ServerCertificateValidationCallback += 
+                    ServicePointManager.ServerCertificateValidationCallback +=
                         delegate
                         (
-                            Object obj, 
-                            X509Certificate certificate, 
-                            X509Chain chain, 
+                            Object obj,
+                            X509Certificate certificate,
+                            X509Chain chain,
                             SslPolicyErrors errors
                         )
                         {
@@ -62,8 +62,8 @@ Try {
 function SendMail ($Message) {
     if ($global:LastSMTP -lt (Get-Date).AddMinutes($EmailInterval * -1)) {
         Write-Debug  "Sending email at $(Get-Date)  Last:$($global:LastSMTP)"
-        $smtp.body = "Unhandled exception at $(Get-Date)`r`n$Message`r`n$_"
         $global:LastSMTP = (Get-Date)
+        $smtp.body = $Message
         Send-MailMessage @smtp
     } else {
         Write-Debug "Too soon for another email! Last:$($global:LastSMTP)"
@@ -79,7 +79,7 @@ function Login-ScaleIO($Gateway) {
         } else {
             $responseData = Invoke-RESTMethod -Uri "https://$($Gateway.ip)/api/login" -Method Get -Headers $headers
         }
-    } 
+    }
     catch [System.Net.WebException] {
         if ($_.Exception.Response.StatusCode.Value__ -eq 401) {
             Write-Warning "Authentication error on $(IP). Can't go any further. You should fix this, so aborting"
@@ -135,7 +135,7 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
 
 Function Write-Influx ([String]$Messages) {
     try {
-        Write-Debug $InfluxURL
+        Write-Debug "$InfluxURL $Messages"
         if ($IsCoreCLR) {
             Invoke-RestMethod -Uri $InFluxURL -Method Post -Body $Messages -TimeoutSec 30 -DisableKeepAlive -SkipCertificateCheck | Out-Null
         } else {
@@ -159,13 +159,33 @@ While ($true) {
     $Error.Clear()
     ForEach ($GateWay in ($Gateways | Where {$_.enabled})) {
 
+        # First, let's look for any disk errors or dodgy cluster state
+        $failedDisks = 0
+        $ErrorState = ""
+        $SDSes = Invoke-ScaleIORestMethod -Gateway $Gateway -URI "/api/types/Sds/instances"
+        ForEach ($SDS in $SDSes) {
+            $Devices = Invoke-ScaleIORestMethod -Gateway $Gateway -URI "/api/instances/Sds::$($SDS.id)/relationships/Device"
+            ForEach ($Device in ($Devices | Where {$_.ErrorState -ne 'None'})) {
+                $ErrorState += "`nCluster: $($Gateway.FriendlyName)`nNode: $($SDS.Name)`nDevice: $($Device.Name)`nPath: $($Device.deviceCurrentPathName)`nState: $($Device.ErrorState)"
+                Write-Debug "$ErrorState"
+                $failedDisks += 1
+            }
+        }
+        if ($failedDisks -gt 0) {
+            $pre = $smtp.subject
+            $smtp.subject = "ScaleIO alert - failed disk?"
+            $smtp.subject = $pre
+            Write-Influx "ScaleioErrors,Cluster=$($Gateway.FriendlyName) failedDisks=$($failedDisks)i $($timestamp)"
+            SendMail $ErrorState
+        }
+
         $ProtectionDomains = Invoke-ScaleIORestMethod -Gateway $Gateway -URI "/api/types/ProtectionDomain/instances"
         ForEach ($ProtectionDomain in $ProtectionDomains) {
             $StoragePools = Invoke-ScaleIORestMethod -Gateway $Gateway -URI "/api/instances/ProtectionDomain::$($ProtectionDomain.ID)/relationships/StoragePool"
             ForEach ($StoragePool in $StoragePools) {
                 $Stats = Invoke-ScaleIORestMethod -Gateway $Gateway -URI "/api/instances/StoragePool::$($StoragePool.ID)/relationships/Statistics"
                 $influxentry = "scaleio,Cluster=$($Gateway.Friendlyname),Pool=$($StoragePool.Name) "
-                
+
                 ForEach ($metric in $spmetrics) {
                     if ($metric -match "Bwc$") {
                         if ($Stats.$($metric).numSeconds -ne 0) {
@@ -183,7 +203,6 @@ While ($true) {
                 }
                 $influxentry = $influxentry -replace ".$"
                 $influxentry += " $($timestamp)"
-                Write-Debug "$influxentry"
                 Write-Influx -Messages $influxEntry
             }
         }
