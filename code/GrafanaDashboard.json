@@ -53,7 +53,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1542965332616,
+  "iteration": 1542968418742,
   "links": [],
   "panels": [
     {
@@ -85,7 +85,7 @@
       "id": 11,
       "interval": null,
       "links": [],
-      "mappingType": 2,
+      "mappingType": 1,
       "mappingTypes": [
         {
           "name": "value to text",
@@ -103,7 +103,13 @@
       "postfixFontSize": "50%",
       "prefix": "",
       "prefixFontSize": "50%",
-      "rangeMaps": [],
+      "rangeMaps": [
+        {
+          "from": "",
+          "text": "",
+          "to": ""
+        }
+      ],
       "sparkline": {
         "fillColor": "rgba(31, 118, 189, 0.18)",
         "full": false,
@@ -164,8 +170,13 @@
       "valueMaps": [
         {
           "op": "=",
-          "text": "N/A",
+          "text": "0",
           "value": "null"
+        },
+        {
+          "op": "=",
+          "text": "0",
+          "value": "no value"
         }
       ],
       "valueName": "current"
@@ -276,7 +287,18 @@
       "transparent": false,
       "type": "singlestat",
       "valueFontSize": "80%",
-      "valueMaps": [],
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        },
+        {
+          "op": "=",
+          "text": "0",
+          "value": "no value"
+        }
+      ],
       "valueName": "current"
     },
     {
@@ -1858,7 +1880,7 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1890,5 +1912,5 @@
   "timezone": "browser",
   "title": "ScaleIO",
   "uid": "2Ta5PRhmz",
-  "version": 26
+  "version": 30
 }
