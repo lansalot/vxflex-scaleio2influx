@@ -53,7 +53,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1542968418742,
+  "iteration": 1542968418751,
   "links": [],
   "panels": [
     {
@@ -82,6 +82,7 @@
         "x": 0,
         "y": 0
       },
+      "hideTimeOverride": false,
       "id": 11,
       "interval": null,
       "links": [],
@@ -302,6 +303,20 @@
       "valueName": "current"
     },
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 5,
+      "panels": [],
+      "repeat": "Pool",
+      "title": "Storage Pool $Pool",
+      "type": "row"
+    },
+    {
       "aliasColors": {
         "Allocated": "#E5AC0E",
         "Read": "#447EBC",
@@ -324,7 +339,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 2
+        "y": 3
       },
       "id": 4,
       "interval": ">10s",
@@ -516,7 +531,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 2
+        "y": 3
       },
       "id": 2,
       "interval": ">10s",
@@ -684,20 +699,6 @@
         "align": false,
         "alignLevel": null
       }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 9
-      },
-      "id": 5,
-      "panels": [],
-      "repeat": "Pool",
-      "title": "Storage Pool $Pool",
-      "type": "row"
     },
     {
       "aliasColors": {},
@@ -1912,5 +1913,5 @@
   "timezone": "browser",
   "title": "ScaleIO",
   "uid": "2Ta5PRhmz",
-  "version": 30
+  "version": 32
 }
