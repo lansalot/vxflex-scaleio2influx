@@ -113,7 +113,10 @@ Function Invoke-ScaleIORestMethod ($Gateway, [String]$URI) {
         }
         return $responseData
     }
-    catch [System.Net.WebException],[Microsoft.Powershell.Commands.HttpResponseException] {
+    # Uncomment this line if using Powershell Core
+    # catch [Microsoft.Powershell.Commands.HttpResponseException] {
+    # Uncomment this line if using Powershell 'classic'
+    catch [System.Net.WebException] {
         if ($_.Exception.Response.StatusCode.Value__ -eq 401) {
             # Now, a login token is only valid for 8 hrs, even when in use, so let's get a new one
             Write-Debug "Looks like old logon token expired."
@@ -185,6 +188,7 @@ While ($true) {
             Write-Influx "ScaleioErrors,Cluster=$($Gateway.FriendlyName) failedDisks=$($failedDisks)i $($timestamp)"
             SendMail $ErrorState
         } else {
+            # we only write a zero-errors state every hour, save on space, handy for grafana
             if ($LastDiskErrors[$Gateway.FriendlyName] -lt (Get-Date).AddHours(-1)) {
                 Write-Debug "Time for a new zero-count for disk errors for $($Gateway.FriendlyName)"
                 Write-Influx "ScaleioErrors,Cluster=$($Gateway.FriendlyName) failedDisks=0i $($timestamp)"
